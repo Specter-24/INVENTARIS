@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Entri Inventaris - Login</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Michroma&display=swap"
+        rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Font default untuk kebanyakan teks */
+        }
+
+        /* Menetapkan lebar minimum untuk kontainer utama agar kompatibel dengan perangkat mobile */
+        .main-container {
+            min-width: 320px;
+        }
+
+        /* Custom styling for status messages */
+        .status-success {
+            background-color: #16a34a;
+            color: #d1fae5;
+        }
+
+        /* Dark Green Success */
+        .status-error {
+            background-color: #dc2626;
+            color: #fee2e2;
+        }
+
+        /* Dark Red Error */
+        .status-loading {
+            background-color: #0f766e;
+            color: #e0f2f1;
+        }
+
+        /* Dark Teal Loading */
+        /* Cyberpunk Neon Glow on Teal elements (Tombol Submit & Total) */
+        .neon-glow {
+            box-shadow: 0 0 10px rgba(20, 184, 166, 0.5), 0 0 20px rgba(20, 184, 166, 0.3);
+            /* Teal glow */
+        }
+
+        /* Cyberpunk Neon Glow for Logout (Red Glow) */
+        .neon-glow-red {
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.6), 0 0 16px rgba(239, 68, 68, 0.4);
+            /* Red glow */
+        }
+
+
+        /* TYPOGRAPHY CYBERPUNK - Michroma Font */
+        .font-michroma {
+            font-family: 'Michroma', sans-serif;
+        }
+
+        /* Custom class untuk Input Angka Kondisi */
+        .condition-input {
+            /* Hapus border default input, karena div parent sudah memiliki border */
+            border: none;
+            /* Padding vertikal lebih kecil */
+            padding: 0.5rem 0.5rem;
+            /* Text lebih besar dan berat */
+            font-size: 1.5rem;
+            /* text-2xl */
+            font-weight: 800;
+            /* font-extrabold */
+            /* Pastikan input tidak memiliki latar belakang yang berbeda dari card */
+            background-color: transparent;
+            /* Matikan focus outline bawaan */
+            outline: none;
+        }
+
+        /* Override focus ring pada input agar focus effect pindah ke card parent */
+        .condition-input:focus {
+            box-shadow: none;
+        }
+
+        /* Menambahkan kursor pointer pada kartu untuk visual feedback */
+        .condition-card {
+            cursor: pointer;
+            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            /* Pastikan transisi untuk semua properti */
+        }
+
+        /* Efek Hover (sedikit naik) */
+        .condition-card:hover {
+            transform: scale(1.05);
+        }
+
+        /* Untuk memposisikan tombol logout secara absolut di dalam header */
+        .header-relative {
+            position: relative;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 min-h-screen flex items-center justify-center p-4">
+
+
+    <div
+        class="main-container bg-gray-800 rounded-xl shadow-2xl shadow-teal-500/10 w-full max-w-sm overflow-hidden border border-teal-800">
+
+
+        <header class="header-relative bg-gray-900/80 px-6 py-4 text-white text-center border-b-4 border-teal-500">
+            <div class="flex items-center justify-center space-x-4">
+                <i data-lucide="scan" class="w-8 h-8 text-teal-400"></i>
+
+                <h1 class="text-3xl font-extrabold tracking-widest uppercase text-teal-300 font-michroma">SISTEM
+                    INVENTARIS</h1>
+            </div>
+
+            <p class="text-xs text-gray-400 mt-2 font-medium pt-2">Kontrol Akses dan Entri Data</p>
+
+
+
+            <button id="logoutButton" title="Keluar dari Ruangan"
+                class="absolute bottom-2 right-2 flex items-center space-x-1 px-2 py-1 text-sm font-bold rounded-full bg-red-700 hover:bg-red-600 text-white shadow-lg neon-glow-red border border-red-500 transition duration-200 ease-in-out focus:ring-red-500 focus:outline-none focus:ring-2 hidden">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                <span>Keluar</span>
+            </button>
+        </header>
+
+        <div class="p-6 sm:p-8">
+
+
+            <p id="statusMessage" class="px-4 py-3 rounded-lg text-center font-semibold hidden mb-6 mt-4"></p>
+
+
+            <section id="login-page">
+                <h2 class="text-xl font-semibold text-gray-200 border-b border-gray-700 pb-2 mb-4">Otentikasi Ruangan
+                </h2>
+                <form id="loginForm" class="space-y-4">
+
+
+                    <div>
+                        <label for="roomID" class="block text-sm font-medium text-gray-400">ID Ruangan</label>
+
+                        <input type="text" id="roomID" name="roomID"
+                            class="mt-1 block w-full px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:ring-teal-500 focus:border-teal-500 transition"
+                            required placeholder="Contoh: TU atau DG">
+                    </div>
+
+
+                    <div class="pt-2">
+
+                        <button type="submit"
+                            class="w-full flex justify-center py-3 px-4 rounded-lg shadow-md text-lg font-bold text-white bg-teal-700 hover:bg-teal-600 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 ease-in-out neon-glow font-michroma tracking-widest">
+                            LOGIN
+                        </button>
+                    </div>
+                </form>
+
+                <p id="loginMessage" class="mt-6 text-center text-sm font-medium text-red-400"></p>
+
+                <p class="mt-4 text-center text-xs text-gray-500 font-normal">Copyright SMPN 1 Mootilango</p>
+
+            </section>
+
+
+
+            <section id="form-page" class="hidden">
+
+
+                <form id="inventoryForm" class="space-y-6">
+
+
+                    <div class="space-y-4">
+                        <h2 class="text-xl font-semibold text-gray-200 border-b border-gray-700 pb-2 mb-4">I. Data Umum
+                            Barang</h2>
+
+
+                        <div id="ruangan"
+                            class="bg-indigo-900 text-indigo-300 font-semibold p-3 rounded-lg border border-indigo-700 shadow-sm transition text-center text-base">
+
+                        </div>
+
+                        <div>
+                            <label for="namaBarang" class="block text-sm font-medium text-gray-400">Nama Barang</label>
+
+                            <input type="text" id="namaBarang" name="namaBarang"
+                                class="mt-1 block w-full px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:ring-teal-500 focus:border-teal-500 transition"
+                                required placeholder="Contoh: Proyektor Epson EB-W49">
+                        </div>
+
+                        <!-- INPUT BARU: SUMBER DANA -->
+                        <div>
+                            <label for="sumberDana" class="block text-sm font-medium text-gray-400">Sumber Dana</label>
+                            <select id="sumberDana" name="sumberDana"
+                                class="mt-1 block w-full px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-white focus:ring-teal-500 focus:border-teal-500 transition"
+                                required>
+                                <option value="DANA BOS">DANA BOS</option>
+                                <option value="LAIN-LAIN">LAIN-LAIN</option>
+                            </select>
+                        </div>
+                        <!-- AKHIR INPUT SUMBER DANA -->
+
+                    </div>
+
+
+                    <div class="p-4 border border-indigo-700 bg-gray-700/50 rounded-lg shadow-inner shadow-teal-900">
+                        <h2 class="text-xl font-bold text-indigo-300 border-b border-indigo-700 pb-2 mb-4">II. Kondisi
+                            Barang (Jumlah)</h2>
+
+
+                        <div class="grid grid-cols-3 gap-3">
+
+
+                            <div
+                                class="condition-card group p-3 rounded-xl bg-gray-700/70 border-2 border-green-700 shadow-xl shadow-green-900/30 focus-within:scale-[1.05] focus-within:border-green-500 focus-within:shadow-green-500/50">
+
+                                <label for="baik"
+                                    class="block text-xs font-bold text-green-400 text-center uppercase mb-1 transition-opacity duration-300 opacity-75 group-hover:opacity-100 group-focus-within:opacity-100">KONDISI
+                                    BAIK</label>
+                                <input type="number" id="baik" name="baik"
+                                    class="condition-input w-full text-center text-green-400 focus:ring-transparent"
+                                    required value="0" min="0" onfocus="this.select()">
+                            </div>
+
+
+                            <div
+                                class="condition-card group p-3 rounded-xl bg-gray-700/70 border-2 border-yellow-700 shadow-xl shadow-yellow-900/30 focus-within:scale-[1.05] focus-within:border-yellow-500 focus-within:shadow-yellow-500/50">
+
+                                <label for="rusakRingan"
+                                    class="block text-xs font-bold text-yellow-400 text-center uppercase mb-1 transition-opacity duration-300 opacity-75 group-hover:opacity-100 group-focus-within:opacity-100">RUSAK
+                                    RINGAN</label>
+                                <input type="number" id="rusakRingan" name="rusakRingan"
+                                    class="condition-input w-full text-center text-yellow-400 focus:ring-transparent"
+                                    required value="0" min="0" onfocus="this.select()">
+                            </div>
+
+
+                            <div
+                                class="condition-card group p-3 rounded-xl bg-gray-700/70 border-2 border-red-700 shadow-xl shadow-red-900/30 focus-within:scale-[1.05] focus-within:border-red-500 focus-within:shadow-red-500/50">
+
+                                <label for="rusakBerat"
+                                    class="block text-xs font-bold text-red-400 text-center uppercase mb-1 transition-opacity duration-300 opacity-75 group-hover:opacity-100 group-focus-within:opacity-100">RUSAK
+                                    BERAT</label>
+                                <input type="number" id="rusakBerat" name="rusakBerat"
+                                    class="condition-input w-full text-center text-red-400 focus:ring-transparent"
+                                    required value="0" min="0" onfocus="this.select()">
+                            </div>
+                        </div>
+
+
+                        <div class="mt-6 pt-3 border-t border-indigo-700 flex justify-between items-center">
+                            <span class="text-lg font-bold text-gray-300">TOTAL KESELURUHAN:</span>
+                            <span id="totalDisplay"
+                                class="text-2xl font-extrabold text-teal-400 bg-teal-900/50 px-4 py-1 rounded-md min-w-[50px] text-center shadow-inner neon-glow font-michroma tracking-widest">0</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="pt-4">
+                        <button type="submit" id="submitButton"
+                            class="w-full flex justify-center py-3 px-4 rounded-lg shadow-lg text-lg font-bold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-teal-400 transition duration-200 ease-in-out neon-glow font-michroma">
+                            <span id="buttonText" class="tracking-widest">SIMPAN DATA INVENTARIS</span>
+                        </button>
+                    </div>
+                </form>
+
+
+                <p class="mt-4 text-center text-xs text-gray-500 font-normal">Copyright SMPN 1 Mootilango</p>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        // Memastikan ikon Lucide di-render setelah DOM dimuat
+        lucide.createIcons();
+
+        // Data Otentikasi Sederhana (Hanya untuk demonstrasi!)
+        const USERS = [
+            // ID Ruangan (roomID), Nama Ruangan Lengkap
+            { roomID: 'TU', ruangan: 'Tata Usaha' },
+            { roomID: 'DG', ruangan: 'Dewan Guru' },
+            { roomID: 'LKB', ruangan: 'Lab Komputer B' },
+            { roomID: 'GP', ruangan: 'Gudang Peralatan' },
+        ];
+
+        // --- KONFIGURASI URL APPS SCRIPT (MANDATORI) ---
+        // HARAP GANTI string di bawah ini dengan URL Web App Anda yang sudah DIDEPLOY.
+        const API_URL = 'https://script.google.com/macros/s/AKfycby7C_C6qOfWrNMCVfPfVEgiJs5Qi-KstIEgxhX_BuPdB_fc0iAn_EraKaDShZHWuzl1/exec';
+        // --------------------------------------------------------------------------------------
+
+        // --- Variabel State Global ---
+        let currentRoom = '';
+        let statusTimeout; // Variabel untuk menyimpan ID timeout pesan status
+
+        // --- Elemen DOM ---
+        const loginPage = document.getElementById('login-page');
+        const formPage = document.getElementById('form-page');
+        const loginForm = document.getElementById('loginForm');
+        const loginMessage = document.getElementById('loginMessage');
+        const logoutButton = document.getElementById('logoutButton'); // Dipindahkan ke header
+
+        const roomIDInput = document.getElementById('roomID'); // Dapatkan input ID Ruangan
+        const ruanganInput = document.getElementById('ruangan'); // Kini merujuk ke DIV Status Ruangan
+        const sumberDanaInput = document.getElementById('sumberDana'); // Ambil elemen select Sumber Dana
+
+        const form = document.getElementById('inventoryForm');
+        const statusMessage = document.getElementById('statusMessage');
+        const submitButton = document.getElementById('submitButton');
+        const buttonText = document.getElementById('buttonText');
+        const totalDisplay = document.getElementById('totalDisplay');
+        const inputBaik = document.getElementById('baik');
+        const inputRusakRingan = document.getElementById('rusakRingan');
+        const inputRusakBerat = document.getElementById('rusakBerat');
+
+        // --- Fungsi Utility ---
+        function calculateTotal() {
+            // Menggunakan parseInt(value) || 0 memastikan nilai non-angka atau kosong diperlakukan sebagai 0
+            const baik = parseInt(inputBaik.value) || 0;
+            const rusakRingan = parseInt(inputRusakRingan.value) || 0;
+            const rusakBerat = parseInt(inputRusakBerat.value) || 0;
+            const total = baik + rusakRingan + rusakBerat;
+            totalDisplay.textContent = total;
+        }
+
+        // Fungsi untuk menampilkan pesan status umum
+        function showStatus(message, type) {
+            // Bersihkan Timeout sebelumnya
+            if (statusTimeout) {
+                clearTimeout(statusTimeout);
+            }
+
+            statusMessage.textContent = message;
+            // Hapus semua kelas styling non-standar
+            statusMessage.classList.remove('hidden', 'status-success', 'status-error', 'status-loading');
+
+            // Tambahkan kembali styling default
+            statusMessage.classList.add('px-4', 'font-semibold', 'block');
+
+            if (type === 'success') {
+                statusMessage.classList.add('status-success');
+
+                // Atur timeout untuk menyembunyikan pesan sukses setelah 5 detik
+                statusTimeout = setTimeout(() => {
+                    statusMessage.classList.add('hidden');
+                }, 5000); // 5 detik
+
+            } else if (type === 'error') {
+                statusMessage.classList.add('status-error');
+            } else if (type === 'loading') {
+                statusMessage.classList.add('status-loading');
+            }
+        }
+
+        function switchView(view) {
+            if (view === 'login') {
+                loginPage.classList.remove('hidden');
+                formPage.classList.add('hidden');
+                document.title = 'Sistem Entri Inventaris - Login';
+                ruanganInput.textContent = ""; // Kosongkan div ruangan
+                logoutButton.classList.add('hidden'); // Sembunyikan tombol logout saat di halaman login
+            } else { // form
+                loginPage.classList.add('hidden');
+                formPage.classList.remove('hidden');
+                document.title = 'Sistem Entri Inventaris - ' + currentRoom;
+                // Div ruangan akan diisi oleh event listener login
+                logoutButton.classList.remove('hidden'); // Tampilkan tombol logout saat di halaman form
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // 1. Login Handler
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            loginMessage.textContent = '';
+
+            const roomID = document.getElementById('roomID').value.toUpperCase(); // Ambil ID Ruangan
+            const user = USERS.find(u => u.roomID === roomID);
+
+            if (user) {
+                currentRoom = user.ruangan; // Ambil Nama Ruangan Lengkap
+                loginForm.reset();
+                switchView('form');
+
+                // Tampilkan pesan sukses login di bagian atas
+                showStatus(`Login berhasil. Mengisi data untuk Ruangan: ${currentRoom}`, 'success');
+
+                // KOTAK RUANGAN: Warna Indigo Gelap (Skema Cyberpunk)
+                ruanganInput.textContent = `Ruangan: ${currentRoom}`; // Hanya tampilkan nama ruangan di kotak status
+
+            } else {
+                // Tampilkan pesan error login di bagian atas
+                showStatus('ID Ruangan tidak ditemukan atau salah.', 'error');
+                loginMessage.textContent = ''; // Hapus pesan error lama di bawah tombol
+            }
+        });
+
+        // 2. Logout Handler
+        logoutButton.addEventListener('click', () => {
+            currentRoom = '';
+            // Reset formulir inventaris sebelum logout
+            form.reset();
+            inputBaik.value = 0;
+            inputRusakRingan.value = 0;
+            inputRusakBerat.value = 0;
+            calculateTotal();
+            statusMessage.classList.add('hidden');
+            switchView('login');
+        });
+
+        // 3. Real-time Total Calculation
+        inputBaik.addEventListener('input', calculateTotal);
+        inputRusakRingan.addEventListener('input', calculateTotal);
+        inputRusakBerat.addEventListener('input', calculateTotal);
+
+        // 4. Inventory Form Submission Handler
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Pengecekan API_URL: Menggunakan variabel yang sudah didefinisikan di awal.
+            if (!API_URL || API_URL === 'PASTE_URL_APPS_SCRIPT_ANDA_DI_SINI' || !API_URL.startsWith('http')) {
+                showStatus("Error: URL Web App belum dikonfigurasi. Harap ganti placeholder API_URL dengan URL Web App Anda.", "error");
+                return;
+            }
+            if (!currentRoom) {
+                showStatus("Error: Ruangan tidak teridentifikasi. Silakan login kembali.", "error");
+                return;
+            }
+
+            // Tampilkan status loading
+            submitButton.disabled = true;
+            buttonText.textContent = 'Menyimpan...';
+            showStatus("Mengirim data ke Google Sheet...", "loading");
+
+            // Kumpulkan data formulir
+            const formData = {
+                ruangan: currentRoom, // Ambil dari variabel state yang TERKUNCI
+                namaBarang: document.getElementById('namaBarang').value,
+                sumberDana: sumberDanaInput.value, // Ambil nilai Sumber Dana
+                baik: document.getElementById('baik').value,
+                rusakRingan: document.getElementById('rusakRingan').value,
+                rusakBerat: document.getElementById('rusakBerat').value,
+            };
+
+            try {
+                // Kirim data ke Google Apps Script menggunakan API_URL
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(formData),
+                    redirect: 'follow',
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // Pesan sukses ini akan disembunyikan otomatis setelah 5 detik
+                    showStatus("Data berhasil disimpan! Formulir direset.", "success");
+                    // Hanya reset input barang dan kondisi, bukan ruangan
+                    document.getElementById('namaBarang').value = '';
+                    inputBaik.value = 0;
+                    inputRusakRingan.value = 0;
+                    inputRusakBerat.value = 0;
+                    calculateTotal(); // Update total display to 0
+
+                } else {
+                    // Tangkap pesan error dari Apps Script (misal: "Input tidak boleh hanya berisi angka.")
+                    console.error('Apps Script Error:', result.message);
+                    throw new Error(result.message || 'Terjadi kesalahan yang tidak diketahui.');
+                }
+
+            } catch (err) {
+                console.error('Fetch error:', err);
+                showStatus(`Error: ${err.message}. Cek konsol browser dan pastikan URL Web App benar.`, "error");
+            } finally {
+                // Kembalikan tombol ke keadaan normal
+                submitButton.disabled = false;
+                buttonText.textContent = 'SIMPAN DATA INVENTARIS';
+            }
+        });
+
+        // --- Initial Load ---
+        window.onload = () => {
+            calculateTotal();
+            switchView('login');
+        };
+    </script>
+</body>
+
+</html>
