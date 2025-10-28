@@ -145,7 +145,7 @@
 
                         <input type="text" id="roomID" name="roomID"
                             class="mt-1 block w-full px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:ring-teal-500 focus:border-teal-500 transition"
-                            required placeholder="Contoh: TU atau DG">
+                            required placeholder="id ruangan">
                     </div>
 
 
@@ -173,7 +173,7 @@
 
 
                     <div class="space-y-4">
-                        <h2 class="text-xl font-semibold text-gray-200 border-b border-gray-700 pb-2 mb-4">I. Data Umum
+                        <h2 class="text-xl font-semibold text-gray-200 border-b border-gray-700 pb-2 mb-4">Data Umum
                             Barang</h2>
 
 
@@ -190,7 +190,7 @@
                                 required placeholder="Contoh: Proyektor Epson EB-W49">
                         </div>
 
-                        <!-- INPUT BARU: SUMBER DANA -->
+                        <!-- INPUT SUMBER DANA -->
                         <div>
                             <label for="sumberDana" class="block text-sm font-medium text-gray-400">Sumber Dana</label>
                             <select id="sumberDana" name="sumberDana"
@@ -202,11 +202,23 @@
                         </div>
                         <!-- AKHIR INPUT SUMBER DANA -->
 
+                        <!-- INPUT BARU: TAHUN PEROLEHAN (MODIFIKASI INI) -->
+                        <div>
+                            <label for="tahunPerolehan" class="block text-sm font-medium text-gray-400">Tahun
+                                Perolehan</label>
+                            <select id="tahunPerolehan" name="tahunPerolehan"
+                                class="mt-1 block w-full px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-white focus:ring-teal-500 focus:border-teal-500 transition"
+                                required>
+                                <!-- Opsi akan diisi oleh JavaScript -->
+                            </select>
+                        </div>
+                        <!-- AKHIR INPUT TAHUN PEROLEHAN -->
+
                     </div>
 
 
                     <div class="p-4 border border-indigo-700 bg-gray-700/50 rounded-lg shadow-inner shadow-teal-900">
-                        <h2 class="text-xl font-bold text-indigo-300 border-b border-indigo-700 pb-2 mb-4">II. Kondisi
+                        <h2 class="text-xl font-bold text-indigo-300 border-b border-indigo-700 pb-2 mb-4">Kondisi
                             Barang (Jumlah)</h2>
 
 
@@ -285,14 +297,11 @@
             { roomID: 'DG', ruangan: 'Dewan Guru' },
             { roomID: 'LKB', ruangan: 'Lab Komputer B' },
             { roomID: 'GP', ruangan: 'Gudang Peralatan' },
-            { roomID: 'LAB', ruangan: 'Laboratorium IPA' },
-            { roomID: 'RKEP', ruangan: 'Ruang Kepala Sekolah' },
-            { roomID: 'ROS', ruangan: 'Ruang Osis' },
         ];
 
         // --- KONFIGURASI URL APPS SCRIPT (MANDATORI) ---
         // HARAP GANTI string di bawah ini dengan URL Web App Anda yang sudah DIDEPLOY.
-        const API_URL = 'https://script.google.com/macros/s/AKfycby7C_C6qOfWrNMCVfPfVEgiJs5Qi-KstIEgxhX_BuPdB_fc0iAn_EraKaDShZHWuzl1/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyLplj9sBXGmrV-IgWykYN8sCZzu1PAl9__kMB544Co28Y9lfWyylCnMCiVexUYnnlf/exec';
         // --------------------------------------------------------------------------------------
 
         // --- Variabel State Global ---
@@ -309,6 +318,7 @@
         const roomIDInput = document.getElementById('roomID'); // Dapatkan input ID Ruangan
         const ruanganInput = document.getElementById('ruangan'); // Kini merujuk ke DIV Status Ruangan
         const sumberDanaInput = document.getElementById('sumberDana'); // Ambil elemen select Sumber Dana
+        const tahunPerolehanInput = document.getElementById('tahunPerolehan'); // Ambil elemen select Tahun Perolehan BARU
 
         const form = document.getElementById('inventoryForm');
         const statusMessage = document.getElementById('statusMessage');
@@ -327,7 +337,34 @@
             const rusakBerat = parseInt(inputRusakBerat.value) || 0;
             const total = baik + rusakRingan + rusakBerat;
             totalDisplay.textContent = total;
+            return total; // Mengembalikan total untuk digunakan dalam validasi
         }
+
+        // FUNGSI BARU: Mengisi opsi tahun dari 2015 hingga tahun saat ini
+        function populateYearSelect() {
+            const currentYear = new Date().getFullYear();
+            const startYear = 2015;
+
+            // Bersihkan opsi yang ada
+            tahunPerolehanInput.innerHTML = '';
+
+            // Tambahkan opsi default
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "Pilih Tahun";
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            tahunPerolehanInput.appendChild(defaultOption);
+
+            // Isi opsi tahun (dari yang terbaru ke yang terlama)
+            for (let year = currentYear; year >= startYear; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                tahunPerolehanInput.appendChild(option);
+            }
+        }
+        // AKHIR FUNGSI BARU
 
         // Fungsi untuk menampilkan pesan status umum
         function showStatus(message, type) {
@@ -434,8 +471,24 @@
                 return;
             }
 
+            // Pengecekan Tahun Perolehan
+            if (tahunPerolehanInput.value === "") {
+                showStatus("Error: Harap pilih Tahun Perolehan.", "error");
+                return;
+            }
+
+            // VALIDASI BARU: MEMASTIKAN TOTAL KUANTITAS TIDAK NOL
+            const totalKuantitas = calculateTotal();
+            if (totalKuantitas === 0) {
+                showStatus("Error: Total kuantitas barang (Baik + Rusak Ringan + Rusak Berat) harus lebih dari 0.", "error");
+                // Hentikan proses submit
+                return;
+            }
+
+
             // Tampilkan status loading
             submitButton.disabled = true;
+            submitButton.classList.add('bg-teal-900', 'cursor-not-allowed'); // Efek disable
             buttonText.textContent = 'Menyimpan...';
             showStatus("Mengirim data ke Google Sheet...", "loading");
 
@@ -444,9 +497,12 @@
                 ruangan: currentRoom, // Ambil dari variabel state yang TERKUNCI
                 namaBarang: document.getElementById('namaBarang').value,
                 sumberDana: sumberDanaInput.value, // Ambil nilai Sumber Dana
+                tahunPerolehan: tahunPerolehanInput.value, // Ambil nilai Tahun Perolehan
                 baik: document.getElementById('baik').value,
                 rusakRingan: document.getElementById('rusakRingan').value,
                 rusakBerat: document.getElementById('rusakBerat').value,
+                // PENAMBAHAN BARU: Kirim total kuantitas ke Google Sheet
+                total: totalKuantitas,
             };
 
             try {
@@ -457,13 +513,22 @@
                     redirect: 'follow',
                 });
 
+                // Periksa jika response.ok adalah false
+                if (!response.ok) {
+                    throw new Error(`HTTP Error! Status: ${response.status}`);
+                }
+
+                // Coba parse JSON
                 const result = await response.json();
+
 
                 if (result.status === 'success') {
                     // Pesan sukses ini akan disembunyikan otomatis setelah 5 detik
                     showStatus("Data berhasil disimpan! Formulir direset.", "success");
                     // Hanya reset input barang dan kondisi, bukan ruangan
                     document.getElementById('namaBarang').value = '';
+                    // Reset select tahun ke opsi default (Pilih Tahun)
+                    tahunPerolehanInput.selectedIndex = 0;
                     inputBaik.value = 0;
                     inputRusakRingan.value = 0;
                     inputRusakBerat.value = 0;
@@ -481,17 +546,18 @@
             } finally {
                 // Kembalikan tombol ke keadaan normal
                 submitButton.disabled = false;
+                submitButton.classList.remove('bg-teal-900', 'cursor-not-allowed'); // Hapus efek disable
                 buttonText.textContent = 'SIMPAN DATA INVENTARIS';
             }
         });
 
         // --- Initial Load ---
         window.onload = () => {
+            populateYearSelect(); // Panggil fungsi ini saat load!
             calculateTotal();
             switchView('login');
         };
     </script>
 </body>
-
 
 </html>
