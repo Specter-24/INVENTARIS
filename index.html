@@ -8,6 +8,10 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Hapus Pustaka jsPDF/AutoTable (atau biarkan saja) karena kita beralih ke window.print() -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script> -->
+
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Michroma&display=swap"
         rel="stylesheet">
@@ -20,8 +24,10 @@
 
         .main-container {
             min-width: 320px;
+            position: relative;
         }
 
+        /* Kelas Toast */
         .status-success {
             background-color: #16a34a;
             color: #d1fae5;
@@ -37,6 +43,7 @@
             color: #e0f2f1;
         }
 
+        /* Efek Estetika */
         .neon-glow {
             box-shadow: 0 0 10px rgba(20, 184, 166, 0.5), 0 0 20px rgba(20, 184, 166, 0.3);
         }
@@ -71,13 +78,7 @@
             transform: scale(1.05);
         }
 
-        .header-relative {
-            position: relative;
-        }
-
-        /* --- STYLE BARU UNTUK MODAL --- */
-
-        /* Backdrop */
+        /* --- STYLE UNTUK MODAL --- */
         .modal-backdrop {
             position: fixed;
             top: 0;
@@ -89,7 +90,6 @@
             transition: opacity 300ms ease-in-out;
         }
 
-        /* Konten Modal */
         .modal-content {
             position: fixed;
             top: 50%;
@@ -98,7 +98,6 @@
             z-index: 50;
             transition: all 300ms ease-in-out;
             max-height: 80vh;
-            /* Batasi tinggi modal */
         }
 
         /* Spinner untuk loading */
@@ -106,7 +105,6 @@
             border: 4px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top: 4px solid #14b8a6;
-            /* Teal color */
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
@@ -121,36 +119,89 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* CSS KHUSUS UNTUK PRINTING (PENTING) */
+        @media print {
+
+            /* Sembunyikan semua elemen selain konten cetak */
+            body>*:not(#print-content) {
+                display: none !important;
+            }
+
+            /* Tampilkan konten cetak */
+            #print-content {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                font-family: 'Inter', sans-serif;
+                color: #000;
+            }
+
+            /* Aturan cetak untuk tabel */
+            #print-content table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 15px;
+            }
+
+            #print-content th,
+            #print-content td {
+                border: 1px solid #999;
+                padding: 8px 10px;
+                text-align: left;
+                font-size: 10pt;
+            }
+
+            #print-content th {
+                background-color: #eee;
+                font-weight: bold;
+            }
+
+            /* Set warna teks agar terbaca di kertas putih */
+            #print-content .text-red-600 {
+                color: #c00 !important;
+            }
+
+            #print-content .text-green-600 {
+                color: #080 !important;
+            }
+
+            #print-content .text-yellow-600 {
+                color: #b80 !important;
+            }
+        }
     </style>
 </head>
 
 <body class="bg-gray-900 min-h-screen flex items-center justify-center p-4">
 
+    <!-- Status Message (TOAST NOTIFICATION) - FIXED POSITION -->
+    <p id="statusMessage"
+        class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-xs px-4 py-3 text-center font-semibold rounded-lg shadow-xl transition-all duration-500 -translate-y-[150%]">
+        Notifikasi</p>
+
+    <!-- Konten Cetak Tersembunyi -->
+    <div id="print-content" class="hidden"></div>
+    <!-- Akhir Konten Cetak Tersembunyi -->
+
 
     <div
         class="main-container bg-gray-800 rounded-xl shadow-2xl shadow-teal-500/10 w-full max-w-sm overflow-hidden border border-teal-800">
 
-        <!-- Header -->
-        <header class="header-relative bg-gray-900/80 px-6 py-4 text-white text-center border-b-4 border-teal-500">
+        <!-- Header Utama -->
+        <header class="bg-gray-900/80 px-6 py-4 text-white text-center border-b-4 border-teal-500 relative">
             <div class="flex items-center justify-center space-x-4">
                 <i data-lucide="scan" class="w-8 h-8 text-teal-400"></i>
                 <h1 class="text-3xl font-extrabold tracking-widest uppercase text-teal-300 font-michroma">SISTEM
                     INVENTARIS</h1>
             </div>
             <p class="text-xs text-gray-400 mt-2 font-medium pt-2">Kontrol Akses dan Entri Data</p>
-
-            <button id="logoutButton" title="Keluar dari Ruangan"
-                class="absolute bottom-2 right-2 flex items-center space-x-1 px-2 py-1 text-sm font-bold rounded-full bg-red-700 hover:bg-red-600 text-white shadow-lg neon-glow-red border border-red-500 transition duration-200 ease-in-out focus:ring-red-500 focus:outline-none focus:ring-2 hidden">
-                <i data-lucide="log-out" class="w-4 h-4"></i>
-                <span>Keluar</span>
-            </button>
         </header>
 
         <!-- Wrapper untuk Page -->
         <div class="p-6 sm:p-8">
-
-            <!-- Status Message -->
-            <p id="statusMessage" class="px-4 py-3 rounded-lg text-center font-semibold hidden mb-6 mt-4"></p>
 
             <!-- Halaman Login -->
             <section id="login-page">
@@ -181,21 +232,32 @@
 
                     <!-- Data Umum -->
                     <div class="space-y-4">
-                        <h2 class="text-xl font-semibold text-gray-200 border-b border-gray-700 pb-2 mb-4">Data Umum
-                            Barang</h2>
+
+                        <!-- Header Data Umum (Judul + Tombol Keluar Baru) -->
+                        <div class="flex justify-between items-center border-b border-gray-700 pb-2 mb-4">
+                            <h2 class="text-xl font-semibold text-gray-200">Data Umum Barang</h2>
+
+                            <!-- Tombol Logout -->
+                            <button type="button" id="logoutButton" title="Keluar dari Ruangan"
+                                class="flex items-center space-x-1 px-3 py-1.5 text-sm font-bold rounded-full bg-red-700 hover:bg-red-600 text-white shadow-lg neon-glow-red border border-red-500 transition duration-200 ease-in-out focus:ring-red-500 focus:outline-none focus:ring-2">
+                                <i data-lucide="log-out" class="w-4 h-4"></i>
+                                <span>Keluar</span>
+                            </button>
+                        </div>
+                        <!-- Akhir Header Data Umum -->
 
                         <!-- Info Ruangan -->
                         <div id="ruangan"
                             class="bg-indigo-900 text-indigo-300 font-semibold p-3 rounded-lg border border-indigo-700 shadow-sm transition text-center text-base">
                         </div>
 
-                        <!-- TOMBOL BARU: Lihat Data -->
+                        <!-- TOMBOL Lihat Data -->
                         <button type="button" id="viewDataButton"
                             class="w-full flex justify-center items-center space-x-2 py-2 px-4 rounded-lg shadow-md text-sm font-semibold text-white bg-blue-700 hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-blue-400 transition duration-200 ease-in-out">
                             <i data-lucide="database" class="w-4 h-4"></i>
                             <span>Lihat Data Ruangan Ini</span>
                         </button>
-                        <!-- AKHIR TOMBOL BARU -->
+                        <!-- AKHIR TOMBOL Lihat Data -->
 
                         <div>
                             <label for="namaBarang" class="block text-sm font-medium text-gray-400">Nama Barang</label>
@@ -287,7 +349,7 @@
     <!-- ================= MODAL BARU UNTUK LIHAT DATA ================= -->
     <div id="dataModal" class="modal-backdrop hidden">
         <div
-            class="modal-content bg-gray-800 text-white rounded-lg shadow-xl border border-teal-700 w-full max-w-3xl m-4">
+            class="modal-content bg-gray-800 text-white rounded-lg shadow-xl border border-teal-700 w-full max-w-4xl m-4">
 
             <!-- Header Modal -->
             <div class="flex justify-between items-center p-4 border-b border-gray-700">
@@ -299,12 +361,19 @@
 
             <!-- Konten Modal -->
             <div class="p-4 overflow-y-auto" style="max-height: 70vh;">
-                <!-- Tombol Refresh -->
-                <div class="mb-4">
+                <div class="mb-4 space-y-2 sm:space-y-0 sm:flex sm:space-x-2">
+                    <!-- Tombol Refresh -->
                     <button type="button" id="refreshDataButton"
-                        class="w-full flex justify-center items-center space-x-2 py-2 px-4 rounded-lg shadow-md text-sm font-semibold text-white bg-indigo-700 hover:bg-indigo-600 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-indigo-400 transition duration-200 ease-in-out">
+                        class="w-full sm:w-1/2 flex justify-center items-center space-x-2 py-2 px-4 rounded-lg shadow-md text-sm font-semibold text-white bg-indigo-700 hover:bg-indigo-600 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-indigo-400 transition duration-200 ease-in-out">
                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                         <span>Muat Ulang Data</span>
+                    </button>
+
+                    <!-- Tombol Cetak ke PDF (BARU: Menggunakan window.print) -->
+                    <button type="button" id="exportPdfButton"
+                        class="w-full sm:w-1/2 flex justify-center items-center space-x-2 py-2 px-4 rounded-lg shadow-md text-sm font-semibold text-white bg-red-700 hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-red-400 transition duration-200 ease-in-out">
+                        <i data-lucide="printer" class="w-4 h-4"></i>
+                        <span>Cetak ke PDF/Print</span>
                     </button>
                 </div>
 
@@ -313,7 +382,7 @@
                     <div class="spinner"></div>
                     <span class="ml-4 text-gray-300">Memuat data...</span>
                 </div>
-                <p id="modalMessage" class.="text-center text-yellow-400 p-4 hidden"></p>
+                <p id="modalMessage" class.class="text-center text-yellow-400 p-4 hidden"></p>
 
                 <!-- Kontainer Tabel -->
                 <div id="dataContainer" class="overflow-x-auto">
@@ -347,6 +416,7 @@
         ];
 
         // --- KONFIGURASI URL APPS SCRIPT (MANDATORI) ---
+        // GANTI INI dengan URL Web App Anda setelah di-Deploy Ulang!
         const API_URL = 'https://script.google.com/macros/s/AKfycbzzoqpWWAmgnzfZkeYhb1eTSt558bV11n0n61-ybbYgbLp9OuWSqNdq2IqkdBbfJ0uy/exec';
         // --------------------------------------------------------------------------------------
 
@@ -354,6 +424,9 @@
         const STORAGE_KEY = 'inventory_room';
         let currentRoom = '';
         let statusTimeout;
+        let fetchedHeaders = []; // Menyimpan header data mentah untuk PDF
+        let fetchedData = [];    // Menyimpan data mentah untuk PDF
+
 
         // --- Elemen DOM ---
         const loginPage = document.getElementById('login-page');
@@ -362,7 +435,6 @@
         const loginMessage = document.getElementById('loginMessage');
         const logoutButton = document.getElementById('logoutButton');
 
-        const roomIDInput = document.getElementById('roomID');
         const ruanganInput = document.getElementById('ruangan');
         const sumberDanaInput = document.getElementById('sumberDana');
         const tahunPerolehanInput = document.getElementById('tahunPerolehan');
@@ -376,14 +448,16 @@
         const inputRusakRingan = document.getElementById('rusakRingan');
         const inputRusakBerat = document.getElementById('rusakBerat');
 
-        // --- ELEMEN DOM BARU (MODAL) ---
+        // --- ELEMEN DOM MODAL ---
         const viewDataButton = document.getElementById('viewDataButton');
         const dataModal = document.getElementById('dataModal');
         const closeModalButton = document.getElementById('closeModalButton');
         const refreshDataButton = document.getElementById('refreshDataButton');
+        const exportPdfButton = document.getElementById('exportPdfButton'); // Tombol Cetak/Print
         const dataContainer = document.getElementById('dataContainer');
         const modalSpinner = document.getElementById('modalSpinner');
         const modalMessage = document.getElementById('modalMessage');
+        const printContentContainer = document.getElementById('print-content');
 
 
         // --- Fungsi Utility ---
@@ -414,17 +488,32 @@
             }
         }
 
+        /**
+         * Menampilkan pesan status sebagai Toast Notification (mengambang, FIXED position).
+         * @param {string} message Pesan yang akan ditampilkan.
+         * @param {'success'|'error'|'loading'} type Tipe pesan untuk pewarnaan.
+         */
         function showStatus(message, type) {
             if (statusTimeout) {
                 clearTimeout(statusTimeout);
             }
+
+            const baseTitle = currentRoom
+                ? 'Sistem Entri Inventaris - ' + currentRoom
+                : 'Sistem Entri Inventaris - Login';
+
+            document.title = `(${message}) | ${baseTitle}`;
+
             statusMessage.textContent = message;
-            statusMessage.classList.remove('hidden', 'status-success', 'status-error', 'status-loading');
-            statusMessage.classList.add('px-4', 'font-semibold', 'block');
+            statusMessage.classList.remove('status-success', 'status-error', 'status-loading', '-translate-y-[150%]');
+            statusMessage.classList.add('translate-y-0');
+
             if (type === 'success') {
                 statusMessage.classList.add('status-success');
                 statusTimeout = setTimeout(() => {
-                    statusMessage.classList.add('hidden');
+                    statusMessage.classList.remove('translate-y-0');
+                    statusMessage.classList.add('-translate-y-[150%]');
+                    document.title = baseTitle;
                 }, 5000);
             } else if (type === 'error') {
                 statusMessage.classList.add('status-error');
@@ -433,27 +522,132 @@
             }
         }
 
+        function hideStatus() {
+            if (statusTimeout) {
+                clearTimeout(statusTimeout);
+            }
+            statusMessage.classList.remove('translate-y-0', 'status-success', 'status-error', 'status-loading');
+            statusMessage.classList.add('-translate-y-[150%]');
+            const baseTitle = currentRoom
+                ? 'Sistem Entri Inventaris - ' + currentRoom
+                : 'Sistem Entri Inventaris - Login';
+            document.title = baseTitle;
+        }
+
+
         function switchView(view) {
             if (view === 'login') {
                 loginPage.classList.remove('hidden');
                 formPage.classList.add('hidden');
                 document.title = 'Sistem Entri Inventaris - Login';
                 ruanganInput.textContent = "";
-                logoutButton.classList.add('hidden');
-                dataModal.classList.add('hidden'); // Sembunyikan modal saat logout
+                dataModal.classList.add('hidden');
             } else { // form
                 loginPage.classList.add('hidden');
                 formPage.classList.remove('hidden');
                 document.title = 'Sistem Entri Inventaris - ' + currentRoom;
-                logoutButton.classList.remove('hidden');
             }
         }
 
-        // --- FUNGSI BARU: Pengambilan & Tampilan Data ---
 
         /**
-         * Mengambil data inventaris dari Google Apps Script untuk ruangan saat ini.
+         * FUNGSI BARU: Mencetak data inventaris menggunakan window.print() (Cetak ke PDF)
+         * Ini adalah solusi untuk mengatasi pemblokiran CDN jsPDF.
          */
+        function printDataToPDF() {
+            if (fetchedData.length === 0) {
+                showStatus('Tidak ada data yang tersedia untuk dicetak.', 'error');
+                return;
+            }
+
+            // Nonaktifkan tombol selama proses
+            exportPdfButton.disabled = true;
+            exportPdfButton.querySelector('span').textContent = 'Mempersiapkan...';
+
+            try {
+                const ruanganText = document.getElementById('ruangan').textContent;
+                const date = new Date().toLocaleDateString('id-ID', {
+                    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                // 1. Buat HTML untuk Header Cetak
+                let printHTML = `
+                    <div style="padding: 20px;">
+                        <h1 style="text-align: center; font-size: 24pt; margin-bottom: 5px;">LAPORAN DATA INVENTARIS</h1>
+                        <h2 style="text-align: center; font-size: 14pt; margin-bottom: 10px;">${ruanganText}</h2>
+                        <p style="text-align: right; font-size: 10pt; margin-bottom: 20px;">Tanggal Cetak: ${date}</p>
+                    </div>
+                `;
+
+                // 2. Buat HTML untuk Tabel
+                let tableHTML = `<table style="width: 100%; border-collapse: collapse; page-break-after: always;"><thead><tr>`;
+                fetchedHeaders.forEach(header => {
+                    // Kelas untuk styling print, jika diperlukan
+                    let headerClass = "";
+                    if (header.toUpperCase().includes('TOTAL')) {
+                        headerClass = "bg-gray-200";
+                    }
+                    tableHTML += `<th class="${headerClass}">${header}</th>`;
+                });
+                tableHTML += `</tr></thead><tbody>`;
+
+                fetchedData.forEach(itemArray => {
+                    tableHTML += `<tr>`;
+                    itemArray.forEach((cellValue, index) => {
+                        const headerName = fetchedHeaders[index] ? fetchedHeaders[index].toUpperCase() : '';
+                        let cellClass = "";
+                        let content = cellValue === null || cellValue === undefined ? '-' : cellValue;
+
+                        // Format Tanggal
+                        if (index === 0 && typeof content === 'string' && !isNaN(new Date(content)) && content.length > 5) {
+                            const date = new Date(content);
+                            content = date.toLocaleDateString('id-ID', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
+                        }
+
+                        // Beri warna/bold pada kolom kondisi untuk visibilitas cetak (hitam putih)
+                        if (headerName.includes('BAIK')) {
+                            cellClass += " text-green-600 font-bold text-center";
+                        } else if (headerName.includes('RINGAN')) {
+                            cellClass += " text-yellow-600 font-bold text-center";
+                        } else if (headerName.includes('BERAT')) {
+                            cellClass += " text-red-600 font-bold text-center";
+                        } else if (headerName.includes('TOTAL')) {
+                            cellClass += " font-extrabold text-center";
+                        }
+
+                        tableHTML += `<td class="${cellClass}">${content}</td>`;
+                    });
+                    tableHTML += `</tr>`;
+                });
+
+                tableHTML += `</tbody></table>`;
+
+                // 3. Masukkan HTML ke dalam container cetak dan cetak
+                printContentContainer.innerHTML = printHTML + tableHTML;
+
+                // Memaksa DOM untuk merender sebelum print (opsional, tapi disarankan)
+                requestAnimationFrame(() => {
+                    window.print();
+                    showStatus('Siap mencetak. Harap pilih "Simpan sebagai PDF" di dialog browser.', 'success');
+                });
+
+
+            } catch (error) {
+                console.error("Print Error:", error);
+                showStatus(`Gagal membuat dokumen cetak: ${error.message}. Cek konsol.`, 'error');
+            } finally {
+                // Pastikan tombol diaktifkan kembali
+                exportPdfButton.disabled = false;
+                exportPdfButton.querySelector('span').textContent = 'Cetak ke PDF/Print';
+            }
+        }
+
+
+        // --- FUNGSI PENGAMBILAN & TAMPILAN DATA ---
         async function loadInventoryData() {
             if (!currentRoom) {
                 modalMessage.textContent = "Ruangan tidak teridentifikasi. Silakan login kembali.";
@@ -461,17 +655,24 @@
                 return;
             }
 
+            // Reset data mentah
+            fetchedHeaders = [];
+            fetchedData = [];
+
             // Set state loading
             modalSpinner.classList.remove('hidden');
-            dataContainer.innerHTML = ''; // Kosongkan tabel
+            dataContainer.innerHTML = '';
             modalMessage.classList.add('hidden');
             refreshDataButton.disabled = true;
 
+            // Pastikan tombol Cetak/Print selalu aktif (tidak tergantung CDN)
+            exportPdfButton.disabled = true;
+            exportPdfButton.querySelector('span').textContent = 'Memuat Data...';
+
+
             try {
-                // Buat URL untuk GET request
-                // Kita tambahkan parameter 'action=getData' & 'ruangan'
                 const url = new URL(API_URL);
-                url.searchParams.append('action', 'getData'); // Memberi tahu script kita mau ambil data
+                url.searchParams.append('action', 'getData');
                 url.searchParams.append('ruangan', currentRoom);
 
                 const response = await fetch(url, { method: 'GET' });
@@ -482,10 +683,24 @@
 
                 const result = await response.json();
 
-                if (result.status === 'success') {
-                    renderDataTable(result.data);
+                if (result.status === 'success' && result.headers && result.data) {
+
+                    fetchedHeaders = result.headers;
+                    fetchedData = result.data;
+
+                    renderDataTable(result);
+                    if (result.data.length > 0) {
+                        exportPdfButton.disabled = false;
+                        exportPdfButton.querySelector('span').textContent = 'Cetak ke PDF/Print';
+                    } else {
+                        exportPdfButton.querySelector('span').textContent = 'Cetak ke PDF/Print (0 Data)';
+                    }
+                } else if (result.status === 'success' && result.data.length === 0) {
+                    modalMessage.textContent = 'Tidak ada data inventaris yang ditemukan untuk ruangan ini.';
+                    modalMessage.classList.remove('hidden');
+                    exportPdfButton.querySelector('span').textContent = 'Cetak ke PDF/Print (0 Data)';
                 } else {
-                    throw new Error(result.message || 'Gagal memuat data dari script.');
+                    throw new Error(result.message || 'Respons Apps Script tidak sesuai format.');
                 }
 
             } catch (err) {
@@ -496,14 +711,16 @@
                 // Hentikan state loading
                 modalSpinner.classList.add('hidden');
                 refreshDataButton.disabled = false;
+                lucide.createIcons();
             }
         }
 
         /**
-         * Merender data yang diterima ke dalam tabel HTML.
-         * @param {Array<Object>} data - Array berisi objek data inventaris.
+         * Merender tabel data untuk tampilan HTML di modal.
          */
-        function renderDataTable(data) {
+        function renderDataTable(result) {
+            const { headers, data } = result;
+
             if (!data || data.length === 0) {
                 modalMessage.textContent = 'Tidak ada data inventaris yang ditemukan untuk ruangan ini.';
                 modalMessage.classList.remove('hidden');
@@ -511,42 +728,69 @@
                 return;
             }
 
-            // Buat tabel
+            // 1. BUAT HEADER TABEL SECARA DINAMIS
+            let headerHTML = '<tr>';
+            headers.forEach(header => {
+                let headerClass = "px-4 py-3 border border-gray-600";
+                if (header.toUpperCase().includes('TOTAL')) {
+                    headerClass += " text-center bg-teal-800/50";
+                } else if (header.toUpperCase().includes('BAIK') || header.toUpperCase().includes('RINGAN') || header.toUpperCase().includes('BERAT')) {
+                    headerClass += " text-center";
+                }
+
+                headerHTML += `<th scope="col" class="${headerClass}">${header}</th>`;
+            });
+            headerHTML += '</tr>';
+
+
+            // 2. BUAT BARIS TABEL SECARA DINAMIS
+            let bodyHTML = '';
+            data.forEach(itemArray => {
+                bodyHTML += '<tr class="bg-gray-800 border-b border-gray-700 hover:bg-gray-700">';
+
+                itemArray.forEach((cellValue, index) => {
+                    const headerName = headers[index] ? headers[index].toUpperCase() : '';
+                    let cellClass = "px-4 py-2 border border-gray-600 whitespace-nowrap";
+
+                    let content = cellValue === null || cellValue === undefined ? '-' : cellValue;
+
+                    // Format tanggal jika kolom pertama
+                    if (index === 0 && typeof content === 'string' && !isNaN(new Date(content)) && content.length > 5) {
+                        const date = new Date(content);
+                        content = date.toLocaleDateString('id-ID', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                    }
+
+                    // Beri warna pada kolom kondisi untuk estetika
+                    if (headerName.includes('BAIK')) {
+                        cellClass += " text-center font-bold text-green-400";
+                    } else if (headerName.includes('RINGAN')) {
+                        cellClass += " text-center font-bold text-yellow-400";
+                    } else if (headerName.includes('BERAT')) {
+                        cellClass += " text-center font-bold text-red-400";
+                    } else if (headerName.includes('TOTAL')) {
+                        cellClass += " text-center font-extrabold text-teal-300 bg-teal-900/10";
+                    } else if (headerName.includes('TANGGAL') || headerName.includes('TAHUN')) {
+                        cellClass += " text-center";
+                    }
+
+                    bodyHTML += `<td class="${cellClass}">${content}</td>`;
+                });
+                bodyHTML += '</tr>';
+            });
+
+
+            // 3. GABUNGKAN SEMUA
             let tableHTML = `
                 <table class="w-full text-sm text-left text-gray-300 border-collapse border border-gray-700">
                     <thead class="text-xs text-teal-300 uppercase bg-gray-700">
-                        <tr>
-                            <th scope="col" class="px-4 py-3 border border-gray-600">Nama Barang</th>
-                            <th scope="col" class="px-2 py-3 border border-gray-600 text-center">Tahun</th>
-                            <th scope="col" class="px-4 py-3 border border-gray-600">Sumber</th>
-                            <th scope="col" class="px-2 py-3 border border-gray-600 text-center">Baik</th>
-                            <th scope="col" class="px-2 py-3 border border-gray-600 text-center">RR</th>
-                            <th scope="col" class="px-2 py-3 border border-gray-600 text-center">RB</th>
-                            <th scope="col" class="px-2 py-3 border border-gray-600 text-center">Total</th>
-                        </tr>
+                        ${headerHTML}
                     </thead>
                     <tbody>
-            `;
-
-            // Isi baris tabel
-            // Kita asumsikan 'data' adalah array of objects dari Apps Script
-            // Penting: Nama properti (cth: item.namaBarang) harus SAMA PERSIS
-            // dengan yang dikirim oleh Apps Script Anda.
-            for (const item of data) {
-                tableHTML += `
-                    <tr class="bg-gray-800 border-b border-gray-700 hover:bg-gray-700">
-                        <td classclass="px-4 py-2 border border-gray-600 font-medium whitespace-nowrap">${item.namaBarang || '-'}</td>
-                        <td class="px-2 py-2 border border-gray-600 text-center">${item.tahunPerolehan || '-'}</td>
-                        <td class="px-4 py-2 border border-gray-600">${item.sumberDana || '-'}</td>
-                        <td class="px-2 py-2 border border-gray-600 text-center font-bold text-green-400">${item.baik || 0}</td>
-                        <td class="px-2 py-2 border border-gray-600 text-center font-bold text-yellow-400">${item.rusakRingan || 0}</td>
-                        <td class="px-2 py-2 border border-gray-600 text-center font-bold text-red-400">${item.rusakBerat || 0}</td>
-                        <td class="px-2 py-2 border border-gray-600 text-center font-bold text-teal-300">${item.total || 0}</td>
-                    </tr>
-                `;
-            }
-
-            tableHTML += `
+                        ${bodyHTML}
                     </tbody>
                 </table>
             `;
@@ -586,8 +830,8 @@
             inputRusakRingan.value = 0;
             inputRusakBerat.value = 0;
             calculateTotal();
-            statusMessage.classList.add('hidden');
-            switchView('login'); // Ini akan otomatis menyembunyikan modal
+            hideStatus();
+            switchView('login');
         });
 
         // 3. Real-time Total Calculation
@@ -599,7 +843,7 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            if (!API_URL || API_URL === 'PASTE_URL_APPS_SCRIPT_ANDA_DI_SINI' || !API_URL.startsWith('http')) {
+            if (!API_URL || API_URL.includes('PASTE_URL_APPS_SCRIPT_ANDA_DI_SINI') || !API_URL.startsWith('http')) {
                 showStatus("Error: URL Web App belum dikonfigurasi.", "error");
                 return;
             }
@@ -631,13 +875,16 @@
                 rusakRingan: document.getElementById('rusakRingan').value,
                 rusakBerat: document.getElementById('rusakBerat').value,
                 total: totalKuantitas,
-                action: 'postData' // Menambahkan 'action' untuk POST
+                action: 'postData'
             };
 
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify(formData),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     redirect: 'follow',
                 });
 
@@ -648,7 +895,8 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    showStatus("Data berhasil disimpan! Formulir direset.", "success");
+                    showStatus(result.message || "Data berhasil diproses!", "success");
+
                     document.getElementById('namaBarang').value = '';
                     tahunPerolehanInput.selectedIndex = 0;
                     inputBaik.value = 0;
@@ -671,14 +919,12 @@
         });
 
 
-        // --- EVENT LISTENER BARU (MODAL) ---
+        // --- EVENT LISTENER MODAL ---
 
         // 5. Buka Modal
         viewDataButton.addEventListener('click', () => {
             dataModal.classList.remove('hidden');
-            // Render ikon lucide di dalam modal (tombol close, etc)
             lucide.createIcons();
-            // Langsung muat data saat modal dibuka
             loadInventoryData();
         });
 
@@ -689,7 +935,6 @@
 
         // 7. Tutup Modal (Klik Backdrop)
         dataModal.addEventListener('click', (e) => {
-            // Cek jika yang diklik adalah backdrop-nya (bukan konten di dalamnya)
             if (e.target === dataModal) {
                 dataModal.classList.add('hidden');
             }
@@ -697,6 +942,9 @@
 
         // 8. Refresh Data (Tombol Refresh)
         refreshDataButton.addEventListener('click', loadInventoryData);
+
+        // 9. Cetak/Print ke PDF (Tombol Baru)
+        exportPdfButton.addEventListener('click', printDataToPDF);
 
 
         // --- Initial Load ---
@@ -712,8 +960,8 @@
                 showStatus(`Sesi ditemukan. Anda berada di Ruangan: ${currentRoom}`, 'success');
             } else {
                 switchView('login');
+                hideStatus();
             }
-            // Pastikan semua ikon di-render saat load awal
             lucide.createIcons();
         };
     </script>
