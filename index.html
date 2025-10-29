@@ -8,10 +8,6 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Hapus Pustaka jsPDF/AutoTable (atau biarkan saja) karena kita beralih ke window.print() -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script> -->
-
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Michroma&display=swap"
         rel="stylesheet">
@@ -207,6 +203,15 @@
             <section id="login-page">
                 <h2 class="text-xl font-semibold text-gray-200 border-b border-gray-700 pb-2 mb-4">Otentikasi Ruangan
                 </h2>
+
+                <!-- PERINGATAN KRITIS BARU: Muncul jika URL belum diganti -->
+                <div id="urlWarning"
+                    class="hidden bg-red-800 p-3 rounded-lg mb-4 border border-red-500 text-white font-medium text-sm transition-all duration-300">
+                    ⚠️ **PERINGATAN KRITIS:** URL Apps Script Belum Dikonfigurasi! Anda **WAJIB** mengganti nilai
+                    variabel `API_URL` di kode JavaScript.
+                </div>
+                <!-- AKHIR PERINGATAN -->
+
                 <form id="loginForm" class="space-y-4">
                     <div>
                         <label for="roomID" class="block text-sm font-medium text-gray-400">ID Ruangan</label>
@@ -416,8 +421,11 @@
         ];
 
         // --- KONFIGURASI URL APPS SCRIPT (MANDATORI) ---
-        // GANTI INI dengan URL Web App Anda setelah di-Deploy Ulang!
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzzoqpWWAmgnzfZkeYhb1eTSt558bV11n0n61-ybbYgbLp9OuWSqNdq2IqkdBbfJ0uy/exec';
+        // !!! PENTING: JANGAN LUPA GANTI URL INI DENGAN URL BARU DARI DEPLOYMENT APPS SCRIPT ANDA !!!
+        // TEMPATKAN URL WEB APP ANDA DI SINI
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzSvCaB4hH-RW2fcnqWoRPh29J_Uhrvd4hZF8O4buQM2KhgjqHxaEophHNRr7jD5tDN/exec';
+        // URL Contoh (Harap ganti ini): 
+        // const API_URL_EXAMPLE = 'https://script.google.com/macros/s/AKfycbznBw6-dZoE2cJgLT0FlAM3e6BcY8xyr1FIAZM7nvw5Ayk33QOav4zGZ_roKrFSKrUu/exec';
         // --------------------------------------------------------------------------------------
 
         // --- Variabel State Global ---
@@ -434,6 +442,7 @@
         const loginForm = document.getElementById('loginForm');
         const loginMessage = document.getElementById('loginMessage');
         const logoutButton = document.getElementById('logoutButton');
+        const urlWarning = document.getElementById('urlWarning'); // Elemen peringatan
 
         const ruanganInput = document.getElementById('ruangan');
         const sumberDanaInput = document.getElementById('sumberDana');
@@ -552,7 +561,6 @@
 
         /**
          * FUNGSI BARU: Mencetak data inventaris menggunakan window.print() (Cetak ke PDF)
-         * Ini adalah solusi untuk mengatasi pemblokiran CDN jsPDF.
          */
         function printDataToPDF() {
             if (fetchedData.length === 0) {
@@ -669,13 +677,24 @@
             exportPdfButton.disabled = true;
             exportPdfButton.querySelector('span').textContent = 'Memuat Data...';
 
+            // Pengecekan URL yang lebih ketat sebelum fetch
+            if (API_URL === 'URL_WEB_APP_BELUM_DIKONFIGURASI' || !API_URL.startsWith('http')) {
+                modalMessage.textContent = "Error: URL Web App belum dikonfigurasi. Harap periksa variabel API_URL.";
+                modalMessage.classList.remove('hidden');
+                console.error("Kesalahan Konfigurasi: Variabel API_URL di baris 260-an masih menggunakan placeholder. Harap ganti dengan URL Apps Script yang sudah dideploy.");
+                modalSpinner.classList.add('hidden');
+                refreshDataButton.disabled = false;
+                return;
+            }
+
 
             try {
+                // Class URL bawaan JavaScript digunakan untuk mengelola URL.
                 const url = new URL(API_URL);
                 url.searchParams.append('action', 'getData');
                 url.searchParams.append('ruangan', currentRoom);
 
-                const response = await fetch(url, { method: 'GET' });
+                const response = await fetch(url.toString(), { method: 'GET' });
 
                 if (!response.ok) {
                     throw new Error(`Gagal mengambil data. Status: ${response.status}`);
@@ -705,7 +724,7 @@
 
             } catch (err) {
                 console.error('Error loadInventoryData:', err);
-                modalMessage.textContent = `Error: ${err.message}`;
+                modalMessage.textContent = `Error: ${err.message}. Pastikan izin Apps Script 'Who has access' adalah 'Anyone'.`;
                 modalMessage.classList.remove('hidden');
             } finally {
                 // Hentikan state loading
@@ -804,6 +823,12 @@
         // 1. Login Handler
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            // Cegah login jika URL masih placeholder
+            if (API_URL === 'URL_WEB_APP_BELUM_DIKONFIGURASI') {
+                showStatus("Error: Konfigurasi URL Apps Script Anda Gagal.", "error");
+                return;
+            }
+
             loginMessage.textContent = '';
             const roomID = document.getElementById('roomID').value.toUpperCase();
             const user = USERS.find(u => u.roomID === roomID);
@@ -843,8 +868,11 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            if (!API_URL || API_URL.includes('PASTE_URL_APPS_SCRIPT_ANDA_DI_SINI') || !API_URL.startsWith('http')) {
-                showStatus("Error: URL Web App belum dikonfigurasi.", "error");
+            // Pengecekan URL yang lebih ketat
+            if (API_URL === 'URL_WEB_APP_BELUM_DIKONFIGURASI' || !API_URL.startsWith('http')) {
+                showStatus("Error: URL Web App belum dikonfigurasi dengan benar.", "error");
+                // Tampilkan pesan di konsol untuk panduan
+                console.error("Kesalahan Konfigurasi: Variabel API_URL di baris 260-an masih menggunakan placeholder. Harap ganti dengan URL Apps Script yang sudah dideploy.");
                 return;
             }
             if (!currentRoom) {
@@ -882,12 +910,11 @@
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify(formData),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    // Header 'Content-Type' dihapus berdasarkan permintaan untuk kompatibilitas Apps Script
                     redirect: 'follow',
                 });
 
+                // Cek jika response gagal (e.g., status 404, 500)
                 if (!response.ok) {
                     throw new Error(`HTTP Error! Status: ${response.status}`);
                 }
@@ -909,8 +936,14 @@
                 }
 
             } catch (err) {
+                // Blok catch ini menangani 'Failed to fetch' (masalah koneksi/CORS/URL salah) dan error dari throw di atas.
                 console.error('Fetch error:', err);
                 showStatus(`Error: ${err.message}. Cek konsol browser dan pastikan URL Web App benar.`, "error");
+                // Tambahkan panduan lebih lanjut di konsol:
+                console.error("--- PANDUAN PEMECAHAN MASALAH FETCH ---");
+                console.error("1. PASTIKAN Anda sudah me-Redeploy Google Apps Script Anda (sebagai Web App).");
+                console.error("2. PASTIKAN setting aksesnya adalah 'Anyone' (Siapa saja).");
+                console.error("3. PASTIKAN Anda menyalin URL Web App yang BARU dan menempelkannya di variabel API_URL di bawah.");
             } finally {
                 submitButton.disabled = false;
                 submitButton.classList.remove('bg-teal-900', 'cursor-not-allowed');
@@ -952,16 +985,29 @@
             populateYearSelect();
             calculateTotal();
 
-            const storedRoom = localStorage.getItem(STORAGE_KEY);
-            if (storedRoom) {
-                currentRoom = storedRoom;
-                switchView('form');
-                ruanganInput.textContent = `Ruangan: ${currentRoom}`;
-                showStatus(`Sesi ditemukan. Anda berada di Ruangan: ${currentRoom}`, 'success');
-            } else {
-                switchView('login');
+            const isUrlPlaceholder = API_URL === 'URL_WEB_APP_BELUM_DIKONFIGURASI';
+
+            if (isUrlPlaceholder) {
+                // Tampilkan peringatan jika URL masih placeholder
+                urlWarning.classList.remove('hidden');
+                console.error("KRITIS: Variabel API_URL belum diatur. Harap ganti di kode JS.");
+                switchView('login'); // Pastikan selalu di halaman login
                 hideStatus();
+            } else {
+                // Sembunyikan peringatan dan lanjutkan ke logika login/sesi
+                urlWarning.classList.add('hidden');
+                const storedRoom = localStorage.getItem(STORAGE_KEY);
+                if (storedRoom) {
+                    currentRoom = storedRoom;
+                    switchView('form');
+                    ruanganInput.textContent = `Ruangan: ${currentRoom}`;
+                    showStatus(`Sesi ditemukan. Anda berada di Ruangan: ${currentRoom}`, 'success');
+                } else {
+                    switchView('login');
+                    hideStatus();
+                }
             }
+
             lucide.createIcons();
         };
     </script>
